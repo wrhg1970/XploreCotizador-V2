@@ -1,0 +1,231 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Pillar 1 & Global Safety Net: Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Phase 3: Hardened Global Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isBootstrappedAdmin() {
+      return isVerifiedUser() && request.auth.token.email == 'wrhg1970@gmail.com';
+    }
+
+    function isAdmin() {
+      return isVerifiedUser() && (
+        isBootstrappedAdmin() ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // Validation Blueprint: AdminRecord
+    function isValidAdminRecord(data, adminUid) {
+      return data.keys().hasAll(['uid', 'email', 'createdAt']) &&
+        data.keys().hasOnly(['uid', 'email', 'createdAt']) &&
+        data.uid is string && data.uid.size() >= 1 && data.uid.size() <= 128 &&
+        data.uid == adminUid &&
+        data.email is string && data.email.size() >= 3 && data.email.size() <= 200 &&
+        data.createdAt is timestamp;
+    }
+
+    // Validation Blueprint: UserProfile
+    function isValidUserProfile(data, userId) {
+      return data.keys().hasAll([
+          'uid', 'email', 'displayName', 'role', 'userType',
+          'officeId', 'status', 'lastActiveAt', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'uid', 'email', 'displayName', 'role', 'userType',
+          'officeId', 'status', 'lastActiveAt', 'createdAt', 'updatedAt'
+        ]) &&
+        data.uid is string && data.uid.size() >= 1 && data.uid.size() <= 128 &&
+        data.uid == userId &&
+        data.email is string && data.email.size() >= 3 && data.email.size() <= 200 &&
+        data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 120 &&
+        data.role is string && data.role.size() <= 40 &&
+        data.role in ['Administrador', 'Ejecutivo Comercial', 'Operaciones', 'Finanzas', 'Aprobador', 'Usuario Externo'] &&
+        data.userType is string && data.userType.size() <= 20 &&
+        data.userType in ['interno', 'externo'] &&
+        data.officeId is string && data.officeId.size() >= 1 && data.officeId.size() <= 64 &&
+        data.officeId.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.status is string && data.status.size() <= 20 &&
+        data.status in ['activo', 'inactivo', 'invitado'] &&
+        data.lastActiveAt is string && data.lastActiveAt.size() >= 1 && data.lastActiveAt.size() <= 64 &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    // Validation Blueprint: TravelRequestRecord
+    function isValidTravelRequest(data, requestId) {
+      return data.keys().hasAll([
+          'id', 'folio', 'groupName', 'officeId', 'status',
+          'ownerUid', 'authorizedUids', 'payload', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'id', 'folio', 'groupName', 'officeId', 'status',
+          'ownerUid', 'authorizedUids', 'payload', 'createdAt', 'updatedAt'
+        ]) &&
+        data.id is string && data.id.size() >= 1 && data.id.size() <= 128 &&
+        data.id == requestId &&
+        data.folio is string && data.folio.size() >= 3 && data.folio.size() <= 40 &&
+        data.folio.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.groupName is string && data.groupName.size() >= 1 && data.groupName.size() <= 160 &&
+        data.officeId is string && data.officeId.size() >= 1 && data.officeId.size() <= 64 &&
+        data.officeId.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.status is string && data.status.size() <= 40 &&
+        data.status in [
+          'Borrador', 'Recibida', 'En análisis', 'En cotización',
+          'Pendiente de aprobación', 'Aprobada', 'Enviada', 'En negociación',
+          'Aceptada', 'Rechazada', 'Cancelada', 'Vencida'
+        ] &&
+        data.ownerUid is string && data.ownerUid.size() >= 1 && data.ownerUid.size() <= 128 &&
+        data.ownerUid.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.authorizedUids is list && data.authorizedUids.size() >= 1 && data.authorizedUids.size() <= 50 &&
+        data.authorizedUids[0] is string && data.authorizedUids[0].size() <= 128 &&
+        data.payload is map &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    // Validation Blueprint: SystemConfigRecord
+    function isValidSystemConfig(data, configId) {
+      return data.keys().hasAll([
+          'configId', 'ownerUid', 'versionTag', 'settings', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'configId', 'ownerUid', 'versionTag', 'settings', 'createdAt', 'updatedAt'
+        ]) &&
+        data.configId is string && data.configId.size() >= 1 && data.configId.size() <= 64 &&
+        data.configId == configId &&
+        data.ownerUid is string && data.ownerUid.size() >= 1 && data.ownerUid.size() <= 128 &&
+        data.ownerUid.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.versionTag is string && data.versionTag.size() >= 1 && data.versionTag.size() <= 64 &&
+        data.settings is map &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    // Collection: /admins/{adminUid}
+    match /admins/{adminUid} {
+      allow get: if isSignedIn() && isValidId(adminUid) && (request.auth.uid == adminUid || isAdmin());
+      allow list: if isBootstrappedAdmin() && existing().uid == request.auth.uid;
+      allow create: if isVerifiedUser() && isValidId(adminUid) &&
+        isValidAdminRecord(incoming(), adminUid) &&
+        incoming().createdAt == request.time &&
+        isBootstrappedAdmin();
+      allow update: if isVerifiedUser() && isValidId(adminUid) &&
+        isValidAdminRecord(incoming(), adminUid) &&
+        incoming().uid == existing().uid &&
+        incoming().createdAt == existing().createdAt &&
+        isBootstrappedAdmin() &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['email']);
+      allow delete: if false;
+    }
+
+    // Collection: /users/{userId} (PII Isolated)
+    match /users/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && (request.auth.uid == userId || isAdmin());
+      allow list: if isSignedIn() && (existing().uid == request.auth.uid || isBootstrappedAdmin());
+      allow create: if isVerifiedUser() && isValidId(userId) &&
+        isValidUserProfile(incoming(), userId) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time &&
+        (
+          (request.auth.uid == userId && incoming().role in ['Ejecutivo Comercial', 'Usuario Externo'] && incoming().status == 'activo') ||
+          isAdmin()
+        );
+      allow update: if isVerifiedUser() && isValidId(userId) &&
+        isValidUserProfile(incoming(), userId) &&
+        incoming().uid == existing().uid &&
+        incoming().email == existing().email &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        (
+          // Action 1: Self profile activity update (no role/status/office escalation)
+          (request.auth.uid == userId && existing().status == 'activo' &&
+            incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'lastActiveAt', 'updatedAt'])) ||
+          // Action 2: Administrator RBAC and status management
+          (isAdmin() &&
+            incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'role', 'userType', 'officeId', 'status', 'lastActiveAt', 'updatedAt']))
+        );
+      allow delete: if false;
+    }
+
+    // Collection: /travel_requests/{requestId}
+    match /travel_requests/{requestId} {
+      allow get: if isSignedIn() && isValidId(requestId) && (
+        existing().ownerUid == request.auth.uid ||
+        request.auth.uid in existing().authorizedUids ||
+        isAdmin()
+      );
+      allow list: if isSignedIn() && (
+        existing().ownerUid == request.auth.uid ||
+        request.auth.uid in existing().authorizedUids ||
+        isBootstrappedAdmin()
+      );
+      allow create: if isVerifiedUser() && isValidId(requestId) &&
+        isValidTravelRequest(incoming(), requestId) &&
+        incoming().ownerUid == request.auth.uid &&
+        request.auth.uid in incoming().authorizedUids &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if isVerifiedUser() && isValidId(requestId) &&
+        isValidTravelRequest(incoming(), requestId) &&
+        incoming().id == existing().id &&
+        incoming().folio == existing().folio &&
+        incoming().ownerUid == existing().ownerUid &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        (
+          // Terminal state lock: 'Cancelada' records cannot be modified except by Admin
+          (existing().status != 'Cancelada' &&
+            (existing().ownerUid == request.auth.uid || request.auth.uid in existing().authorizedUids) &&
+            incoming().diff(existing()).affectedKeys().hasOnly(['groupName', 'officeId', 'status', 'authorizedUids', 'payload', 'updatedAt'])) ||
+          (isAdmin() &&
+            incoming().diff(existing()).affectedKeys().hasOnly(['groupName', 'officeId', 'status', 'authorizedUids', 'payload', 'updatedAt']))
+        );
+      allow delete: if false;
+    }
+
+    // Collection: /system_configs/{configId}
+    match /system_configs/{configId} {
+      allow get: if isSignedIn() && isValidId(configId);
+      allow list: if isSignedIn() && (existing().ownerUid == request.auth.uid || isBootstrappedAdmin());
+      allow create: if isVerifiedUser() && isValidId(configId) &&
+        isValidSystemConfig(incoming(), configId) &&
+        incoming().ownerUid == request.auth.uid &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time &&
+        isAdmin();
+      allow update: if isVerifiedUser() && isValidId(configId) &&
+        isValidSystemConfig(incoming(), configId) &&
+        incoming().configId == existing().configId &&
+        incoming().ownerUid == existing().ownerUid &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        isAdmin() &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['versionTag', 'settings', 'updatedAt']);
+      allow delete: if false;
+    }
+  }
+}

@@ -1,0 +1,1278 @@
+PROMPT MAESTRO — GOOGLE AI STUDIO
+
+Cotizador y Administrador de Propuestas | Estudiantes Embajadores
+
+Actúa como un equipo senior integrado por un Product Manager, arquitecto de software, diseñador UX/UI, desarrollador full-stack, especialista en seguridad y QA engineer.
+
+Construye una aplicación web funcional, moderna, sencilla de operar y preparada para producción, llamada EE Cotizador, para Estudiantes Embajadores (EE), empresa de educación internacional en México.
+
+No quiero únicamente un prototipo visual. Quiero una aplicación funcional con formularios, navegación, persistencia de datos, reglas de negocio, cálculos automáticos, permisos, aprobaciones, generación de documentos e historial de actividad.
+
+La aplicación deberá poder integrarse posteriormente con XploreTogether, WeTravel y Wissify mediante APIs.
+
+1. OBJETIVO DEL PRODUCTO
+
+Desarrollar una plataforma centralizada para administrar el ciclo completo de solicitudes de viajes grupales y propuestas económicas:
+
+Registrar una solicitud de cotización.
+
+Identificar quién la solicita, cuándo y para qué grupo.
+
+Registrar todos los requerimientos del viaje.
+
+Crear múltiples escenarios de cotización para diferentes números de participantes y chaperones.
+
+Comparar escenarios dentro de un mismo expediente.
+
+Calcular automáticamente costos, comisiones, márgenes y precio final.
+
+Solicitar y registrar aprobaciones internas.
+
+Generar propuestas comerciales en PDF y archivos exportables.
+
+Registrar cuándo se envió cada propuesta, a quién y por qué medio.
+
+Registrar cuál propuesta fue aceptada y por quién.
+
+Conservar el historial de versiones, modificaciones y decisiones.
+
+Preparar la información para integrarse con XploreTogether, WeTravel y Wissify.
+
+El sistema debe reducir el trabajo manual en Excel, disminuir errores financieros y facilitar la colaboración entre oficinas y áreas de EE.
+
+2. PRINCIPIOS DE DISEÑO
+
+Interfaz en español, con arquitectura preparada para múltiples idiomas.
+
+Diseño limpio, profesional, intuitivo y adaptable a computadora, tablet y celular.
+
+Captura rápida, con pocos clics y formularios divididos en pasos lógicos.
+
+Guardado automático o borradores recuperables.
+
+Validaciones claras y mensajes de error comprensibles.
+
+Tablas con búsqueda, filtros, ordenamiento y paginación.
+
+Dashboard con indicadores útiles.
+
+Cálculos financieros reproducibles y auditables.
+
+Separación estricta entre costos internos y documentos comerciales para el cliente.
+
+Seguridad desde el diseño.
+
+Arquitectura modular que permita incorporar nuevas oficinas, productos, integraciones y funcionalidades.
+
+Utiliza la identidad visual de Estudiantes Embajadores como referencia. Si no se proporcionan logotipos ni manual de marca, crea una interfaz profesional provisional con azul institucional, blanco y grises neutros. No inventes logotipos oficiales.
+
+3. TECNOLOGÍAS
+
+Construye una aplicación full-stack utilizando tecnologías compatibles con Google AI Studio Build.
+
+Preferencias iniciales:
+
+Frontend: React, TypeScript y componentes reutilizables.
+
+Estilos: Tailwind CSS o un sistema de diseño equivalente.
+
+Backend: endpoints o funciones de servidor para la lógica de negocio.
+
+Autenticación: Firebase Authentication con Google OAuth.
+
+Base de datos: Firebase/Firestore para el primer MVP, con una capa de acceso a datos desacoplada que permita migrar a PostgreSQL si se requiere.
+
+Archivos: almacenamiento privado mediante Firebase Storage o servicio equivalente.
+
+Validación: esquemas tipados en frontend y backend.
+
+Pruebas: unitarias, integración y pruebas de flujos críticos.
+
+Despliegue: infraestructura compatible con Google Cloud y las capacidades disponibles en el entorno.
+
+Antes de implementar, verifica qué servicios admite realmente el entorno de Google AI Studio. Si alguna tecnología no está disponible, propone una alternativa compatible sin simular capacidades inexistentes.
+
+No expongas secretos ni claves de API en el código del frontend. Utiliza variables de entorno y configuración de servidor.
+
+4. AUTENTICACIÓN Y USUARIOS
+
+Implementa acceso con Google OAuth.
+
+Requisitos:
+
+Inicio de sesión con cuenta Google.
+
+Cierre de sesión.
+
+Protección de rutas.
+
+Gestión de sesiones.
+
+Invitaciones a usuarios autorizados.
+
+Activación y desactivación de usuarios.
+
+Registro de última actividad.
+
+Control de permisos en backend, no solamente ocultando botones.
+
+Posibilidad de limitar usuarios por oficina.
+
+No permitas el acceso automático a cualquier persona por el simple hecho de utilizar Google. Configura una lista de dominios autorizados o un sistema de invitaciones administrado por un administrador.
+
+Prepara dos tipos de usuarios:
+
+Usuarios internos EE
+
+Ejecutivos comerciales.
+
+Coordinadores de viajes.
+
+Personal de operaciones.
+
+Finanzas.
+
+Aprobadores.
+
+Administradores.
+
+Usuarios externos autorizados
+
+Socios u oficinas autorizadas.
+
+Colaboradores invitados, si se habilita este flujo.
+
+Acceso limitado exclusivamente a solicitudes y documentos compartidos con ellos.
+
+Un usuario externo nunca debe poder consultar cotizaciones internas, comisiones, costos confidenciales ni expedientes ajenos.
+
+5. MÓDULOS DE LA APLICACIÓN
+
+Módulo A. Dashboard
+
+Crear un dashboard inicial con tarjetas e indicadores:
+
+Solicitudes recibidas.
+
+Solicitudes nuevas.
+
+Solicitudes en cotización.
+
+Cotizaciones pendientes de aprobación.
+
+Propuestas enviadas.
+
+Propuestas aceptadas.
+
+Propuestas rechazadas.
+
+Solicitudes vencidas o próximas a vencer.
+
+Tiempo promedio desde la solicitud hasta el envío.
+
+Tasa de aceptación de propuestas.
+
+Agregar filtros por:
+
+Oficina.
+
+Responsable.
+
+País.
+
+Ciudad.
+
+Periodo.
+
+Estado.
+
+Tipo de programa.
+
+Las cifras deben provenir de los registros reales de la base de datos.
+
+Módulo B. Solicitudes de viaje
+
+Crear un formulario sencillo, preferentemente dividido en tres pasos.
+
+Paso 1. Información general
+
+Campos obligatorios o configurables:
+
+Folio automático y único.
+
+Nombre del grupo.
+
+Oficina solicitante.
+
+Persona que solicita.
+
+Responsable comercial.
+
+Fecha y hora de solicitud, generadas automáticamente.
+
+Fecha límite para entregar la propuesta.
+
+Fecha de salida.
+
+Fecha de regreso.
+
+Ciudad.
+
+País.
+
+Número de participantes.
+
+Número de chaperones.
+
+Número de staff adicional.
+
+Presupuesto estimado.
+
+Moneda del presupuesto.
+
+Tipo de programa.
+
+Comentarios adicionales.
+
+Requerimientos especiales.
+
+Archivos adjuntos.
+
+Paso 2. Especificaciones
+
+Permitir capturar:
+
+Tipo de alojamiento.
+
+Tipo de escuela o proveedor.
+
+Cursos o actividades solicitadas.
+
+Traslados.
+
+Alimentación.
+
+Seguro.
+
+Vuelos, cuando corresponda.
+
+Visitas y excursiones.
+
+Requerimientos de accesibilidad.
+
+Observaciones operativas.
+
+Servicios incluidos y excluidos.
+
+Las especificaciones deberán ser configurables por tipo de programa, sin necesidad de modificar el código para agregar nuevos campos sencillos.
+
+Paso 3. Confirmación
+
+Mostrar un resumen editable de la solicitud.
+
+Acciones:
+
+Guardar borrador.
+
+Registrar solicitud.
+
+Cancelar.
+
+Duplicar solicitud.
+
+Adjuntar documentos.
+
+Al registrar la solicitud, generar un folio, guardar al solicitante y establecer automáticamente la fecha de creación.
+
+Módulo C. Administrador de solicitudes
+
+Crear una tabla principal con:
+
+Folio.
+
+Grupo.
+
+Oficina.
+
+Destino.
+
+Fechas.
+
+Participantes.
+
+Responsable.
+
+Fecha de solicitud.
+
+Fecha límite.
+
+Estado.
+
+Número de escenarios.
+
+Última actualización.
+
+Estados mínimos:
+
+Borrador.
+
+Recibida.
+
+En análisis.
+
+En cotización.
+
+Pendiente de aprobación.
+
+Aprobada.
+
+Enviada.
+
+En negociación.
+
+Aceptada.
+
+Rechazada.
+
+Cancelada.
+
+Vencida.
+
+Permitir búsqueda por folio, grupo o destino; filtros combinables y acceso al expediente completo.
+
+Registrar cada cambio de estado con usuario, fecha, hora, estado anterior y nuevo estado.
+
+Módulo D. Cotizador de viajes
+
+Este es el núcleo del sistema.
+
+Cada solicitud puede tener múltiples escenarios de cotización.
+
+Ejemplo:
+
+Escenario A: 20 participantes y 2 chaperones.
+
+Escenario B: 25 participantes y 2 chaperones.
+
+Escenario C: 30 participantes y 3 chaperones.
+
+Todos deben quedar agrupados dentro del mismo expediente, con comparativo de costos y precio final.
+
+Cada escenario debe tener:
+
+Datos generales
+
+Nombre del escenario.
+
+Número de participantes.
+
+Número de chaperones.
+
+Número de staff adicional.
+
+Días y noches.
+
+Divisa de costos.
+
+Divisa de venta.
+
+Tipo de cambio.
+
+Fecha y vigencia del tipo de cambio.
+
+Fecha de elaboración.
+
+Fecha de vencimiento de la cotización.
+
+Conceptos configurables
+
+Precio neto del programa.
+
+Transporte y traslados.
+
+Comidas.
+
+Kit EE.
+
+Seguro.
+
+Promociones y descuentos.
+
+Envío de kits.
+
+Gastos de operación.
+
+Otros gastos.
+
+Comisión de escuela.
+
+Comisión de coordinadora.
+
+Gastos del líder o responsable.
+
+Compensación del líder.
+
+Gastos de chaperones.
+
+Fondo de emergencia.
+
+Gastos por día.
+
+Vuelos.
+
+Impuestos.
+
+Servicios adicionales.
+
+Otros conceptos personalizados.
+
+Cada concepto debe admitir:
+
+Nombre.
+
+Descripción.
+
+Cantidad.
+
+Unidad.
+
+Costo unitario.
+
+Moneda.
+
+Tipo de cálculo.
+
+Importe calculado.
+
+Si aplica por participante, por chaperón, por grupo, por día o como importe fijo.
+
+Si es costo interno o concepto visible para el cliente.
+
+Si es obligatorio u opcional.
+
+Si es gravable, cuando aplique.
+
+Si está incluido en el precio o se cobra por separado.
+
+Permitir agregar, editar, duplicar y desactivar conceptos sin alterar cotizaciones históricas.
+
+Módulo E. Motor de fórmulas
+
+No utilices fórmulas financieras dispersas en los componentes de la interfaz.
+
+Construye un motor de cálculo centralizado, probado y documentado.
+
+Todas las fórmulas deberán ser configurables por usuarios autorizados y guardar versiones de configuración.
+
+Cálculos mínimos:
+
+Subtotal de conceptos.
+
+Costos variables según número de participantes.
+
+Costos variables según número de chaperones.
+
+Costos fijos por grupo.
+
+Gastos por día.
+
+Gastos de staff y líderes.
+
+Distribución de gastos compartidos.
+
+Comisiones fijas y porcentuales.
+
+Descuentos.
+
+Impuestos aplicables.
+
+Conversión entre monedas.
+
+Costo total del escenario.
+
+Costo por participante.
+
+Precio de venta por participante.
+
+Precio total del grupo.
+
+Utilidad estimada.
+
+Margen estimado.
+
+Comparación contra presupuesto.
+
+Distingue explícitamente entre:
+
+Recargo sobre costo.
+
+Margen sobre precio de venta.
+
+Comisión calculada sobre costo.
+
+Comisión calculada sobre venta.
+
+No son equivalentes y deben configurarse de forma independiente.
+
+Fórmulas de referencia:
+
+Costo total:
+Suma de costos fijos + costos variables + gastos compartidos asignados + impuestos y cargos aplicables.
+
+Costo unitario:
+Costo total distribuido / unidades facturables correspondientes.
+
+Precio con recargo:
+Costo base × (1 + porcentaje de recargo).
+
+Precio con margen objetivo:
+Costo base / (1 - margen objetivo), siempre que el margen sea inferior al 100 %.
+
+Utilidad:
+Ingreso de venta − costos atribuibles − comisiones y otros gastos considerados en el modelo.
+
+Margen:
+Utilidad / ingreso de venta × 100.
+
+Conversión monetaria:
+Importe en moneda destino = importe original × tipo de cambio definido.
+
+Reglas obligatorias:
+
+Evitar divisiones entre cero.
+
+Rechazar márgenes inválidos.
+
+Validar monedas y tipos de cambio.
+
+No redondear cada operación intermedia innecesariamente.
+
+Redondear los importes monetarios al final según la moneda.
+
+Mostrar los supuestos de cada cálculo.
+
+Permitir recalcular el escenario al cambiar participantes, días o chaperones.
+
+Registrar la versión de las fórmulas utilizada.
+
+Conservar una instantánea de los cálculos de cada propuesta enviada.
+
+No modificar cotizaciones históricas cuando cambie una regla global.
+
+Las fórmulas definitivas deben poder ajustarse después de validar el Excel vigente de EE. No supongas que los ejemplos anteriores representan todas las reglas contables oficiales.
+
+Módulo F. Gastos de chaperones
+
+Implementar un submódulo específico.
+
+Registrar por chaperón:
+
+Número de chaperones.
+
+Gastos de viaje.
+
+Seguro.
+
+Transporte.
+
+Alojamiento.
+
+Alimentación.
+
+Kit.
+
+Gastos por día.
+
+Gastos extraordinarios.
+
+Compensación adicional.
+
+Fondo de emergencia aplicable.
+
+Distinguir los gastos del staff, los chaperones y los líderes.
+
+Permitir configurar qué gastos absorbe la agencia, cuáles se distribuyen entre participantes y cuáles se cobran por separado.
+
+El sistema deberá mostrar cómo cambia el precio por participante cuando cambia el número de estudiantes o chaperones.
+
+Módulo G. Comparador de propuestas
+
+Mostrar los escenarios de un expediente en una tabla comparativa.
+
+Columnas:
+
+Escenario.
+
+Participantes.
+
+Chaperones.
+
+Días.
+
+Costo total.
+
+Costo por participante.
+
+Precio por participante.
+
+Precio total del grupo.
+
+Margen estimado.
+
+Presupuesto.
+
+Variación frente al presupuesto.
+
+Estado de aprobación.
+
+Estado comercial.
+
+Permitir seleccionar escenarios para compararlos y generar un resumen comercial.
+
+Destacar las diferencias de manera visual, sin ocultar costos ni supuestos a los usuarios autorizados.
+
+Módulo H. Aprobaciones
+
+Implementar un flujo de aprobación configurable por oficina, monto, margen y tipo de programa.
+
+El sistema deberá permitir establecer uno o varios niveles de aprobación.
+
+Cada aprobación debe corresponder a una versión concreta del escenario.
+
+Registrar:
+
+Aprobador.
+
+Fecha y hora.
+
+Decisión.
+
+Comentarios.
+
+Versión aprobada.
+
+Motivo de rechazo, cuando corresponda.
+
+Decisiones:
+
+Aprobar.
+
+Rechazar.
+
+Solicitar cambios.
+
+Si se modifica un precio, costo, margen, moneda, tipo de cambio o condición comercial material después de la aprobación, invalidar las aprobaciones afectadas y exigir una nueva revisión.
+
+Regla crítica: no permitir el envío externo de una propuesta que no tenga todas las aprobaciones requeridas.
+
+No permitir que una persona apruebe su propia cotización cuando la política de segregación de funciones de EE lo prohíba.
+
+Módulo I. Generador de propuestas
+
+Generar documentos PDF profesionales y exportaciones Excel cuando corresponda.
+
+Permitir dos formatos:
+
+Documento interno de costos y rentabilidad.
+
+Propuesta comercial para el cliente.
+
+La propuesta comercial debe incluir:
+
+Identidad visual de EE.
+
+Folio.
+
+Nombre del grupo.
+
+Destino.
+
+Fechas.
+
+Número de participantes.
+
+Servicios incluidos.
+
+Servicios excluidos.
+
+Precio y moneda.
+
+Condiciones de pago.
+
+Vigencia.
+
+Condiciones comerciales.
+
+Notas relevantes.
+
+Nunca incluir en el documento comercial las comisiones internas, los costos confidenciales, las credenciales, las notas privadas ni los márgenes internos.
+
+Permitir adjuntar documentos externos y conservarlos en el expediente.
+
+Guardar una copia inmutable de cada documento enviado, junto con el número de versión y fecha de generación.
+
+Módulo J. Registro de envío y aceptación
+
+Registrar cada envío con:
+
+Fecha y hora.
+
+Usuario responsable.
+
+Destinatario.
+
+Canal.
+
+Versión enviada.
+
+Escenarios incluidos.
+
+Documentos adjuntos.
+
+Comentarios.
+
+Resultado o seguimiento pendiente.
+
+Los canales pueden ser correo electrónico, enlace compartido u otro medio registrado.
+
+Si no existe una integración de correo habilitada, permitir registrar el envío manualmente. No afirmar que un documento fue enviado si únicamente fue generado.
+
+Registrar aceptación o rechazo con:
+
+Escenario aceptado.
+
+Fecha.
+
+Usuario que registra el resultado.
+
+Evidencia o documento adjunto.
+
+Comentarios.
+
+Importe aceptado.
+
+Conservar las propuestas anteriores y sus resultados.
+
+Si se acepta un escenario, marcarlo como seleccionado y registrar la decisión. No borrar ni sobrescribir los demás escenarios.
+
+Módulo K. Integraciones
+
+Diseña una capa de adaptadores para integrar posteriormente:
+
+XploreTogether
+
+Compartir solicitudes y escenarios aprobados.
+
+Vincular expedientes.
+
+Sincronizar estados y referencias.
+
+Evitar duplicados.
+
+Mantener trazabilidad de sincronización.
+
+WeTravel
+
+Preparar la integración con los servicios que realmente ofrezca su API.
+
+Sincronizar información de viajes y referencias externas cuando sea compatible.
+
+Gestionar errores y reintentos.
+
+Wissify
+
+Preparar la integración con los endpoints y permisos disponibles.
+
+Vincular información relevante de los programas y estudiantes cuando corresponda.
+
+Google
+
+Google OAuth para autenticación.
+
+Preparación para Google Drive, Gmail o Google Sheets cuando sean necesarios y estén autorizados.
+
+No inventes endpoints, webhooks, permisos ni capacidades de terceros. Verifica la documentación oficial antes de implementar cada conexión.
+
+Por cada integración incluye:
+
+Estado: no configurada, disponible, conectada o error.
+
+Credenciales guardadas en el servidor.
+
+Registro de sincronizaciones.
+
+Reintentos controlados.
+
+Idempotencia.
+
+Manejo de límites de solicitudes.
+
+Alertas de error.
+
+Botón de sincronización manual cuando sea pertinente.
+
+La aplicación debe funcionar correctamente sin estas integraciones. Utiliza adaptadores simulados únicamente en desarrollo y etiquétalos claramente como simulaciones.
+
+Módulo L. Administración
+
+Crear un panel de configuración para administrar:
+
+Oficinas.
+
+Usuarios.
+
+Roles.
+
+Permisos.
+
+Monedas.
+
+Tipos de cambio.
+
+Catálogos de conceptos.
+
+Fórmulas y reglas financieras.
+
+Políticas de aprobación.
+
+Plantillas de propuestas.
+
+Condiciones comerciales.
+
+Integraciones.
+
+Historial de cambios.
+
+Los cambios financieros deben estar restringidos a usuarios autorizados y dejar registro de auditoría.
+
+6. MODELO DE DATOS
+
+Implementa entidades relacionadas para:
+
+User
+
+Office
+
+Role
+
+Permission
+
+UserOffice
+
+TravelRequest
+
+TravelSpecification
+
+QuoteScenario
+
+QuoteScenarioVersion
+
+QuoteLineItem
+
+CostRule
+
+CostRuleVersion
+
+ExchangeRate
+
+ApprovalWorkflow
+
+ApprovalStep
+
+ApprovalDecision
+
+ProposalDocument
+
+ProposalDispatch
+
+ProposalOutcome
+
+Attachment
+
+IntegrationConnection
+
+IntegrationSyncLog
+
+AuditLog
+
+Utiliza identificadores únicos, marcas de tiempo y relaciones explícitas.
+
+Requisitos:
+
+Un usuario puede pertenecer a una o varias oficinas según sus permisos.
+
+Una solicitud puede tener múltiples escenarios.
+
+Cada escenario puede tener varias versiones.
+
+Una versión aprobada debe conservar sus cálculos y condiciones.
+
+Un envío debe apuntar a la versión exacta enviada.
+
+Una aceptación debe apuntar al escenario y la versión correspondiente.
+
+Los registros críticos no se eliminan físicamente mediante operaciones normales.
+
+Las operaciones financieras importantes deben ejecutarse de forma consistente y transaccional cuando la base de datos lo permita.
+
+Si utilizas Firestore, define las colecciones, referencias, reglas de seguridad y estrategias de consistencia. No asumas que Firestore ofrece transacciones entre documentos ilimitadas.
+
+7. ROLES Y PERMISOS
+
+Implementa control de acceso basado en roles y permisos.
+
+Administrador
+
+Gestiona usuarios, oficinas, configuraciones e integraciones.
+
+Consulta información global autorizada.
+
+Ejecutivo comercial
+
+Crea solicitudes.
+
+Consulta las solicitudes permitidas.
+
+Prepara escenarios.
+
+Genera borradores.
+
+Registra seguimiento comercial.
+
+Operaciones
+
+Captura costos y servicios.
+
+Revisa viabilidad.
+
+Administra conceptos operativos.
+
+Finanzas
+
+Revisa costos, comisiones, márgenes, impuestos y tipos de cambio.
+
+Autoriza configuraciones financieras según sus permisos.
+
+Aprobador
+
+Revisa las versiones asignadas.
+
+Aprueba, rechaza o solicita cambios.
+
+Usuario externo
+
+Consulta únicamente expedientes y documentos expresamente compartidos.
+
+No puede acceder a información financiera interna.
+
+Aplica el principio de mínimo privilegio. Verifica los permisos en cada operación del servidor y en las reglas de acceso a datos y archivos.
+
+8. SEGURIDAD Y PRIVACIDAD
+
+Implementa como mínimo:
+
+Autenticación segura con Google.
+
+Autorización del lado del servidor.
+
+Validación de datos en servidor.
+
+Protección contra acceso a registros de otros usuarios u oficinas.
+
+Secretos en variables de entorno o un gestor de secretos.
+
+Restricción de tipos y tamaños de archivos.
+
+URLs temporales para documentos privados cuando corresponda.
+
+Protección frente a inyección, XSS, CSRF y abuso de endpoints, según la arquitectura.
+
+Limitación de solicitudes y protección contra automatización abusiva.
+
+Registros de auditoría sin contraseñas ni secretos.
+
+Manejo seguro de errores.
+
+Política de respaldo y recuperación.
+
+Separación de ambientes de desarrollo, pruebas y producción.
+
+Configuración restrictiva de CORS.
+
+Protección contra exposición accidental de costos internos.
+
+Política de retención y eliminación de datos.
+
+Pruebas de aislamiento entre oficinas y roles.
+
+No almacenes datos de tarjetas bancarias ni información sensible innecesaria.
+
+No consideres que ocultar un botón en la interfaz constituye una medida de seguridad.
+
+9. EXPERIENCIA DE USUARIO
+
+Diseña un menú lateral con:
+
+Dashboard.
+
+Solicitudes.
+
+Cotizaciones.
+
+Aprobaciones.
+
+Propuestas enviadas.
+
+Reportes.
+
+Integraciones.
+
+Administración.
+
+La pantalla de detalle de una solicitud debe concentrar:
+
+Información general.
+
+Especificaciones.
+
+Escenarios.
+
+Comparativo.
+
+Documentos.
+
+Aprobaciones.
+
+Envíos.
+
+Seguimiento.
+
+Historial de actividad.
+
+Implementa indicadores visuales discretos para estados, alertas y pendientes.
+
+Usa formularios cortos, autocompletado donde resulte apropiado, campos condicionales y valores predeterminados configurables.
+
+La prioridad es que una persona nueva pueda registrar una solicitud y preparar una cotización sin necesitar capacitación extensa.
+
+10. REPORTES
+
+Crear reportes filtrables y exportables sobre:
+
+Solicitudes por oficina.
+
+Solicitudes por destino.
+
+Tiempo de respuesta.
+
+Propuestas enviadas.
+
+Tasa de aceptación.
+
+Escenarios por grupo.
+
+Precios promedio.
+
+Diferencias entre presupuesto y precio final.
+
+Rentabilidad estimada.
+
+Motivos de rechazo.
+
+Actividad de usuarios.
+
+Cotizaciones pendientes de aprobación.
+
+Diferenciar claramente datos reales, estimaciones y métricas calculadas.
+
+11. PRUEBAS Y CRITERIOS DE ACEPTACIÓN
+
+Crear pruebas automatizadas para, al menos, los siguientes casos:
+
+Un usuario autorizado inicia sesión correctamente.
+
+Un usuario no autorizado no puede acceder.
+
+Un usuario de una oficina no puede consultar datos de otra sin permiso.
+
+Se crea una solicitud con folio único.
+
+Se valida que la fecha de regreso no sea anterior a la fecha de salida.
+
+Se crea una solicitud con tres escenarios.
+
+Al cambiar los participantes se recalculan los conceptos aplicables.
+
+Al cambiar los chaperones se actualizan sus gastos.
+
+Un tipo de cambio diferente modifica correctamente los importes convertidos.
+
+Se distingue correctamente entre recargo y margen.
+
+Una división entre cero no genera resultados inválidos.
+
+Los totales coinciden con los cálculos esperados.
+
+Una cotización no puede enviarse sin las aprobaciones necesarias.
+
+Un cambio material invalida la aprobación afectada.
+
+Un documento comercial no revela costos internos.
+
+El envío conserva la versión exacta.
+
+La aceptación conserva la evidencia y el escenario seleccionado.
+
+Los cambios importantes quedan registrados en auditoría.
+
+Las integraciones fallidas no duplican operaciones.
+
+La aplicación funciona aunque los conectores externos estén desactivados.
+
+Incluye pruebas unitarias para el motor financiero, pruebas de integración para las operaciones principales y pruebas de extremo a extremo para los flujos críticos.
+
+12. PLAN DE IMPLEMENTACIÓN
+
+Desarrolla el proyecto en fases.
+
+Fase 0 — Preparación
+
+Revisar requisitos.
+
+Definir arquitectura.
+
+Configurar repositorio.
+
+Configurar ambientes.
+
+Establecer convenciones.
+
+Identificar decisiones pendientes.
+
+Fase 1 — Base funcional
+
+Autenticación.
+
+Usuarios y oficinas.
+
+Solicitudes.
+
+Dashboard.
+
+Estados e historial.
+
+Fase 2 — Cotizador
+
+Conceptos configurables.
+
+Motor financiero.
+
+Escenarios múltiples.
+
+Comparador.
+
+Gastos de chaperones.
+
+Pruebas de cálculos.
+
+Fase 3 — Aprobaciones y propuestas
+
+Flujo de aprobación.
+
+Generación de PDF y Excel.
+
+Documentos adjuntos.
+
+Registro de envíos.
+
+Aceptación y seguimiento.
+
+Fase 4 — Administración y reportes
+
+Catálogos.
+
+Fórmulas versionadas.
+
+Reportes.
+
+Auditoría.
+
+Exportaciones.
+
+Fase 5 — Integraciones
+
+XploreTogether.
+
+WeTravel.
+
+Wissify.
+
+Google Drive/Gmail, si se autorizan.
+
+Monitoreo y recuperación de errores.
+
+Fase 6 — Preparación para producción
+
+Pruebas de seguridad.
+
+Pruebas de carga.
+
+Validación de permisos.
+
+Respaldos.
+
+Monitoreo.
+
+Documentación.
+
+Despliegue controlado.
+
+13. FORMA DE TRABAJO
+
+Trabaja incrementalmente.
+
+Primero analiza los requisitos y presenta:
+
+Arquitectura propuesta.
+
+Mapa de pantallas.
+
+Modelo de datos.
+
+Flujos de usuario.
+
+Riesgos técnicos.
+
+Decisiones pendientes.
+
+Plan de construcción.
+
+Después implementa una primera versión funcional.
+
+No generes todas las pantallas como componentes aislados sin persistencia. Conecta cada formulario, tabla, botón y acción a su comportamiento real.
+
+No inventes información de negocio ni fórmulas definitivas. Cuando falte una regla, crea una configuración provisional claramente identificada y documenta qué debe validar EE.
+
+No declares que una función está terminada si no está implementada y probada.
+
+Al concluir cada fase:
+
+Ejecuta las pruebas.
+
+Corrige errores.
+
+Resume los cambios.
+
+Documenta los archivos creados.
+
+Indica qué servicios y credenciales hacen falta.
+
+Señala las funcionalidades todavía simuladas o pendientes.
+
+14. RESULTADO ESPERADO
+
+Entregar una aplicación funcional que permita a Estudiantes Embajadores administrar sus solicitudes, cotizaciones, escenarios, aprobaciones y propuestas comerciales desde una plataforma central.
+
+La aplicación debe ser sencilla, rápida, segura, auditable, escalable y preparada para integrarse con XploreTogether.
+
+Comienza ahora con la Fase 0. Analiza los requisitos, identifica las decisiones pendientes y propone la arquitectura más adecuada para Google AI Studio. No implementes integraciones externas ficticias ni expongas secretos. Una vez definida la arquitectura, construye el MVP por fases y verifica cada funcionalidad antes de continuar.

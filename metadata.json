@@ -1,0 +1,6 @@
+{
+  "name": "EE Cotizador",
+  "description": "Plataforma centralizada de cotización, escenarios financieros, aprobaciones y gestión de propuestas para viajes grupales de Estudiantes Embajadores.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

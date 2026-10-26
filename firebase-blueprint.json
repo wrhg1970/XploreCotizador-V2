@@ -1,0 +1,258 @@
+{
+  "entities": {
+    "AdminRecord": {
+      "title": "AdminRecord",
+      "description": "Trusted administrator membership document.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Administrator user UID"
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Administrator verified email"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of creation"
+        }
+      },
+      "required": ["uid", "email", "createdAt"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User account, role, office assignment, and invitation status.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "User unique identifier"
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "User email address"
+        },
+        "displayName": {
+          "type": "string",
+          "maxLength": 120,
+          "description": "Full name of the user"
+        },
+        "role": {
+          "type": "string",
+          "maxLength": 40,
+          "enum": [
+            "Administrador",
+            "Ejecutivo Comercial",
+            "Operaciones",
+            "Finanzas",
+            "Aprobador",
+            "Usuario Externo"
+          ],
+          "description": "RBAC role within EE Cotizador"
+        },
+        "userType": {
+          "type": "string",
+          "maxLength": 20,
+          "enum": ["interno", "externo"],
+          "description": "Internal EE staff or external partner"
+        },
+        "officeId": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Primary assigned office ID"
+        },
+        "status": {
+          "type": "string",
+          "maxLength": 20,
+          "enum": ["activo", "inactivo", "invitado"],
+          "description": "Account activation status"
+        },
+        "lastActiveAt": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "ISO timestamp of last activity"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server update timestamp"
+        }
+      },
+      "required": [
+        "uid",
+        "email",
+        "displayName",
+        "role",
+        "userType",
+        "officeId",
+        "status",
+        "lastActiveAt",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "TravelRequestRecord": {
+      "title": "TravelRequestRecord",
+      "description": "Group travel quotation request and full dossier state.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Unique dossier identifier"
+        },
+        "folio": {
+          "type": "string",
+          "maxLength": 40,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Unique human-readable folio (e.g., EE-2026-001)"
+        },
+        "groupName": {
+          "type": "string",
+          "maxLength": 160,
+          "description": "Name of school, university, or student group"
+        },
+        "officeId": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Originating EE office ID"
+        },
+        "status": {
+          "type": "string",
+          "maxLength": 40,
+          "enum": [
+            "Borrador",
+            "Recibida",
+            "En análisis",
+            "En cotización",
+            "Pendiente de aprobación",
+            "Aprobada",
+            "Enviada",
+            "En negociación",
+            "Aceptada",
+            "Rechazada",
+            "Cancelada",
+            "Vencida"
+          ],
+          "description": "Current lifecycle status of the travel request"
+        },
+        "ownerUid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Creator user UID"
+        },
+        "authorizedUids": {
+          "type": "array",
+          "description": "Bounded list of UIDs permitted to query this dossier"
+        },
+        "payload": {
+          "type": "object",
+          "description": "Structured dossier details, specifications, scenarios, approvals, dispatches, and audit history"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server update timestamp"
+        }
+      },
+      "required": [
+        "id",
+        "folio",
+        "groupName",
+        "officeId",
+        "status",
+        "ownerUid",
+        "authorizedUids",
+        "payload",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "SystemConfigRecord": {
+      "title": "SystemConfigRecord",
+      "description": "Centralized administration configuration for offices, exchange rates, cost catalog, formula versions, approval policies, and integrations.",
+      "type": "object",
+      "properties": {
+        "configId": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Configuration document identifier"
+        },
+        "ownerUid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Admin user UID who updated the configuration"
+        },
+        "versionTag": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Formula and configuration version tag"
+        },
+        "settings": {
+          "type": "object",
+          "description": "Structured map of offices, exchange rates, cost rules, approval workflows, and integration settings"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server update timestamp"
+        }
+      },
+      "required": [
+        "configId",
+        "ownerUid",
+        "versionTag",
+        "settings",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/admins/{adminUid}": {
+      "schema": { "$ref": "#/entities/AdminRecord" },
+      "description": "Trusted administrator registry"
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "User profiles, roles, offices, and invitation statuses"
+    },
+    "/travel_requests/{requestId}": {
+      "schema": { "$ref": "#/entities/TravelRequestRecord" },
+      "description": "Travel requests, scenarios, approvals, dispatches, and audit logs"
+    },
+    "/system_configs/{configId}": {
+      "schema": { "$ref": "#/entities/SystemConfigRecord" },
+      "description": "Global financial rules, catalogs, offices, exchange rates, and integration configurations"
+    }
+  }
+}
