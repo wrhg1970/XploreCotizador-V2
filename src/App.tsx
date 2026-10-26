@@ -37,7 +37,6 @@ import {
   UserProfile,
 } from './types/domain';
 import {
-  buildInitialTravelRequests,
   INITIAL_SYSTEM_SETTINGS,
   INITIAL_USERS,
 } from './data/seedData';
@@ -46,7 +45,6 @@ import {
   canUserEditQuotes,
   canUserSeeInternalCosts,
   canUserViewRequest,
-  getEffectiveUserPermissions,
   isUserAuthorizedToAccess,
 } from './security/rbac';
 import {
@@ -87,11 +85,15 @@ import {
   Home,
   CheckCircle2,
   Bell,
+  Menu,
+  X,
   Clock,
   Calendar,
   Sparkles,
   FileSpreadsheet,
 } from 'lucide-react';
+
+const APP_DATA_EPOCH = '2026-10-26';
 
 type NavSection =
   | 'mi_dashboard'
@@ -111,11 +113,12 @@ export default function App() {
   const [authReady, setAuthReady] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
-  const [settings, setSettings] = useState<SystemSettings>(INITIAL_SYSTEM_SETTINGS);
+  const [settings, setSettings] = useState<SystemSettings>({
+    ...INITIAL_SYSTEM_SETTINGS,
+    globalAuditLog: [],
+  });
   const [users, setUsers] = useState<UserProfile[]>(INITIAL_USERS);
-  const [requests, setRequests] = useState<TravelRequest[]>(() =>
-    buildInitialTravelRequests('usr_admin_ee')
-  );
+  const [requests, setRequests] = useState<TravelRequest[]>([]);
 
   // Active RBAC user profile (allows switching between EE roles/offices for QA verification)
   const [activePersonaUid, setActivePersonaUid] = useState<string>('usr_admin_ee');
@@ -131,6 +134,7 @@ export default function App() {
     useState<TravelRequest | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -200,36 +204,14 @@ export default function App() {
       reqQuery,
       async (snapshot) => {
         if (snapshot.empty) {
-          // Seed initial requests into Firestore for the authenticated user on first boot
-          const seeded = buildInitialTravelRequests(firebaseUser.uid);
-          for (const req of seeded) {
-            const docPath = `travel_requests/${req.id}`;
-            try {
-              await setDoc(doc(db, 'travel_requests', req.id), {
-                id: req.id,
-                folio: req.folio,
-                groupName: req.groupName,
-                officeId: req.officeId,
-                status: req.status,
-                ownerUid: firebaseUser.uid,
-                authorizedUids: Array.from(
-                  new Set([firebaseUser.uid, ...req.authorizedUids])
-                ).slice(0, 50),
-                payload: req as unknown as Record<string, unknown>,
-                createdAt: serverTimestamp(),
-                updatedAt: serverTimestamp(),
-              });
-            } catch (error) {
-              handleFirestoreError(error, OperationType.CREATE, docPath);
-            }
-          }
-          setRequests(seeded);
+          setRequests([]);
         } else {
           const loaded: TravelRequest[] = [];
           snapshot.forEach((docSnap) => {
             const data = docSnap.data();
-            if (data.payload) {
-              loaded.push(data.payload as TravelRequest);
+            const payload = data.payload as TravelRequest | undefined;
+            if (payload?.dataEpoch === APP_DATA_EPOCH) {
+              loaded.push(payload);
             }
           });
           if (loaded.length > 0) {
@@ -260,11 +242,6 @@ export default function App() {
       canUserViewRequest(currentUser, req, settings.roleDefinitions)
     );
   }, [requests, currentUser, settings.roleDefinitions]);
-
-  const currentUserPerms = useMemo(
-    () => getEffectiveUserPermissions(currentUser, settings.roleDefinitions),
-    [currentUser, settings.roleDefinitions]
-  );
 
   const selectedRequest = useMemo(() => {
     if (!selectedRequestId) return null;
@@ -371,6 +348,7 @@ export default function App() {
   ) => {
     if (!firebaseUser) return;
     const docPath = `travel_requests/${updatedReq.id}`;
+    const stampedReq: TravelRequest = { ...updatedReq, dataEpoch: APP_DATA_EPOCH };
     const ownerUid = firebaseUser.uid;
     const authorizedUids = Array.from(
       new Set([ownerUid, ...updatedReq.authorizedUids])
@@ -381,12 +359,12 @@ export default function App() {
         await setDoc(doc(db, 'travel_requests', updatedReq.id), {
           id: updatedReq.id,
           folio: updatedReq.folio,
-          groupName: updatedReq.groupName,
-          officeId: updatedReq.officeId,
-          status: updatedReq.status,
+          groupName: stampedReq.groupName,
+          officeId: stampedReq.officeId,
+          status: stampedReq.status,
           ownerUid,
           authorizedUids,
-          payload: { ...updatedReq, ownerUid, authorizedUids } as unknown as Record<
+          payload: { ...stampedReq, ownerUid, authorizedUids } as unknown as Record<
             string,
             unknown
           >,
@@ -400,13 +378,13 @@ export default function App() {
           await setDoc(doc(db, 'travel_requests', updatedReq.id), {
             id: existingData.id,
             folio: existingData.folio,
-            groupName: updatedReq.groupName,
-            officeId: updatedReq.officeId,
-            status: updatedReq.status,
+            groupName: stampedReq.groupName,
+            officeId: stampedReq.officeId,
+            status: stampedReq.status,
             ownerUid: existingData.ownerUid,
             authorizedUids,
             payload: {
-              ...updatedReq,
+              ...stampedReq,
               ownerUid: existingData.ownerUid,
               authorizedUids,
             } as unknown as Record<string, unknown>,
@@ -586,7 +564,7 @@ export default function App() {
     { id: 'integraciones', label: 'Integraciones', icon: Plug, internalOnly: true },
     {
       id: 'configuracion',
-      label: 'Configuración (Roles y Usuarios)',
+      label: 'Configuración',
       icon: ShieldCheck,
     },
     { id: 'administracion', label: 'Parámetros Financieros', icon: Settings, internalOnly: true },
@@ -595,6 +573,19 @@ export default function App() {
   const visibleSidebarItems = sidebarItems.filter(
     (item) => !item.internalOnly || showInternalMenus
   );
+
+  const openSection = (itemId: NavSection) => {
+    if (itemId === 'cotizaciones' && accessibleRequests[0]) {
+      setSelectedRequestId(accessibleRequests[0].id);
+      setDossierInitialTab('escenarios');
+      setActiveNav('cotizaciones');
+    } else {
+      setSelectedRequestId(null);
+      setActiveNav(itemId);
+    }
+    setMobileNavOpen(false);
+    setIsNotificationsOpen(false);
+  };
 
   if (showLandingPage) {
     return (
@@ -696,7 +687,16 @@ export default function App() {
         </nav>
 
         {/* Zone 3: Alerts & Primary Action */}
-        <div className="flex items-center gap-3 shrink-0 relative">
+        <div className="flex items-center gap-2 shrink-0 relative">
+          <button
+            type="button"
+            onClick={() => setMobileNavOpen((prev) => !prev)}
+            className="lg:hidden p-2 text-slate-700 bg-slate-50 border border-slate-200 rounded-xl cursor-pointer"
+            aria-expanded={mobileNavOpen}
+            aria-label={mobileNavOpen ? 'Cerrar menú' : 'Abrir menú'}
+          >
+            {mobileNavOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+          </button>
           {/* Smart Notification Bell */}
           <div className="relative">
             <button
@@ -798,10 +798,34 @@ export default function App() {
         </div>
       </header>
 
+      {mobileNavOpen && (
+        <nav className="lg:hidden bg-white border-b border-slate-200 px-3 py-3 grid grid-cols-2 gap-1.5">
+          {visibleSidebarItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = !selectedRequestId && activeNav === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => openSection(item.id)}
+                className={`flex items-center gap-2 px-3 py-2.5 text-xs font-medium rounded-xl cursor-pointer ${
+                  isActive
+                    ? 'bg-[#0F2547] text-white'
+                    : 'text-slate-700 bg-slate-50 hover:bg-slate-100'
+                }`}
+              >
+                <Icon className="w-4 h-4 shrink-0" />
+                <span className="truncate">{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+      )}
+
       {/* Workspace Body: Sidebar + Main Canvas */}
-      <div className="flex-1 flex">
+      <div className="flex-1 flex items-start">
         {/* Lateral Sidebar (256px) */}
-        <aside className="w-64 bg-white border-r border-slate-200/90 hidden lg:flex flex-col justify-between p-4 shrink-0">
+        <aside className="w-64 bg-white border-r border-slate-200/90 hidden lg:flex flex-col justify-between p-4 shrink-0 sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto">
           <div className="space-y-4">
             <div className="space-y-1">
               <div className="px-3 py-1.5 text-[11px] font-semibold text-slate-400 font-mono">
@@ -813,16 +837,7 @@ export default function App() {
                 return (
                   <button
                     key={item.id}
-                    onClick={() => {
-                      if (item.id === 'cotizaciones' && accessibleRequests[0]) {
-                        setSelectedRequestId(accessibleRequests[0].id);
-                        setDossierInitialTab('escenarios');
-                        setActiveNav('cotizaciones');
-                      } else {
-                        setSelectedRequestId(null);
-                        setActiveNav(item.id);
-                      }
-                    }}
+                    onClick={() => openSection(item.id)}
                     className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium rounded-xl transition-colors whitespace-nowrap cursor-pointer ${
                       isActive
                         ? 'bg-[#0F2547] text-white font-semibold shadow-2xs'
@@ -895,31 +910,15 @@ export default function App() {
         <main className="flex-1 min-w-0 p-4 md:p-6 space-y-5 max-w-[1440px] mx-auto w-full">
           {/* Sub-Toolbar: Active Role / Office Context & Quick Verification Switcher */}
           <div className="bg-white border border-slate-200/90 rounded-2xl px-4 py-2.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs">
-            <div className="flex flex-wrap items-center gap-2 text-slate-600">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-slate-600 min-w-0">
               <UserCheck className="w-4 h-4 text-[#1D4ED8] shrink-0" />
-              <span>
-                Sesión activa: <strong className="text-slate-900">{currentUser.displayName}</strong> · Rol:{' '}
-                <strong className="text-[#0F2547]">{currentUser.role}</strong> · Oficina:{' '}
-                <strong className="font-mono text-slate-900">
-                  {settings.offices.find((o) => o.id === currentUser.officeId)?.code ||
-                    currentUser.officeId}
-                </strong>{' '}
-                · Permisos:{' '}
-                <strong className="text-slate-800">
-                  {[
-                    currentUserPerms.canAuthorizeQuotes ? 'Autoriza' : null,
-                    currentUserPerms.canEditQuotes ? 'Edita' : null,
-                    currentUserPerms.canDeleteRecords ? 'Borra' : null,
-                    currentUserPerms.canViewRequests &&
-                    !currentUserPerms.canEditQuotes &&
-                    !currentUserPerms.canDeleteRecords &&
-                    !currentUserPerms.canAuthorizeQuotes
-                      ? 'Solo Lectura'
-                      : null,
-                  ]
-                    .filter(Boolean)
-                    .join(' · ') || 'Ver'}
-                </strong>
+              <strong className="text-slate-900 truncate">{currentUser.displayName}</strong>
+              <span className="text-slate-300" aria-hidden="true">·</span>
+              <span>{currentUser.role}</span>
+              <span className="text-slate-300" aria-hidden="true">·</span>
+              <span className="font-mono text-slate-900">
+                {settings.offices.find((o) => o.id === currentUser.officeId)?.code ||
+                  currentUser.officeId}
               </span>
             </div>
 

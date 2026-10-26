@@ -61,14 +61,31 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </nav>
 
         <div className="flex items-center gap-3 shrink-0">
+          {!isSignedIn && (
+            <button
+              type="button"
+              onClick={onEnterDemoWorkspace}
+              className="hidden sm:inline px-3 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 cursor-pointer"
+            >
+              Ver demo
+            </button>
+          )}
           <button
-            onClick={onEnterDemoWorkspace}
-            className="px-4 py-2 text-xs font-semibold text-white bg-[#0B3B70] rounded-lg hover:bg-[#082d56] transition-colors whitespace-nowrap shrink-0"
+            type="button"
+            onClick={isSignedIn ? onEnterDemoWorkspace : onLoginWithGoogle}
+            className="px-4 py-2 text-xs font-semibold text-white bg-[#0B3B70] rounded-lg hover:bg-[#082d56] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
           >
-            {isSignedIn ? 'Ir al Panel Operativo' : 'Iniciar Sesión'}
+            {isSignedIn ? 'Ir al panel' : 'Entrar con Google'}
           </button>
         </div>
       </header>
+
+      <nav className="md:hidden flex gap-4 overflow-x-auto px-6 py-2.5 bg-white border-b border-slate-200 text-sm font-medium text-slate-600">
+        <a href="#proceso" className="whitespace-nowrap">Proceso</a>
+        <a href="#hoja-oficial" className="whitespace-nowrap">Hoja oficial</a>
+        <a href="#comparador-columnas" className="whitespace-nowrap">Comparador</a>
+        <a href="#gobernanza" className="whitespace-nowrap">Seguridad</a>
+      </nav>
 
       {/* Hero Section */}
       <section
@@ -112,21 +129,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <button
                 type="button"
                 onClick={onLoginWithGoogle}
-                className="flex-1 px-4 py-3 text-xs font-semibold text-white bg-[#0B3B70] rounded-lg hover:bg-[#082d56] transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
+                className="flex-1 px-4 py-3 text-sm font-semibold text-white bg-[#0B3B70] rounded-lg hover:bg-[#082d56] transition-colors flex items-center justify-center gap-2 cursor-pointer"
               >
-                <LogIn className="w-4 h-4" />
-                {isSignedIn
-                  ? `Continuar como ${userEmail}`
-                  : 'Iniciar Sesión con Google (OAuth)'}
+                <LogIn className="w-4 h-4 shrink-0" />
+                {isSignedIn ? `Continuar como ${userEmail}` : 'Entrar con Google'}
               </button>
 
               <button
                 type="button"
                 onClick={onEnterDemoWorkspace}
-                className="flex-1 px-4 py-3 text-xs font-semibold text-slate-800 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
+                className="flex-1 px-4 py-3 text-sm font-semibold text-slate-800 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 transition-colors flex items-center justify-center gap-2 cursor-pointer"
               >
-                <span>Ingresar al Entorno Operativo</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>Ver el cotizador</span>
+                <ArrowRight className="w-4 h-4 shrink-0" />
               </button>
             </div>
 

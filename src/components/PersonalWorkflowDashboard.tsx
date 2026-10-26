@@ -212,14 +212,10 @@ export const PersonalWorkflowDashboard: React.FC<PersonalWorkflowDashboardProps>
             </span>
           </div>
           <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 tracking-tight font-display">
-            Mis Propuestas y Proceso Comercial
+            Mis propuestas
           </h1>
-          <p className="text-sm text-slate-600 max-w-3xl leading-relaxed">
-            Consulta el estado de cada propuesta en las 4 etapas del proceso (
-            <strong className="text-slate-900">
-              01. Solicitada → 02. Cotizada → 03. Aprobada → 04. Enviada
-            </strong>
-            ) y ejecuta tu responsabilidad con un clic.
+          <p className="text-sm text-slate-600 max-w-2xl leading-relaxed">
+            Elige una etapa para filtrar y abre la propuesta donde te toca actuar.
           </p>
         </div>
 
@@ -244,7 +240,7 @@ export const PersonalWorkflowDashboard: React.FC<PersonalWorkflowDashboardProps>
       </div>
 
       {/* Interactive 4-Stage Process Pipeline (Solicitada -> Cotizada -> Aprobada -> Enviada) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
         {CORE_PROCESS_STAGES.map((st, idx) => {
           const isSelected = selectedStage === st.id;
           const count = stageCounts[st.id];
@@ -299,7 +295,7 @@ export const PersonalWorkflowDashboard: React.FC<PersonalWorkflowDashboardProps>
 
               <div className="space-y-2 w-full">
                 <p
-                  className={`text-xs leading-snug ${
+                  className={`hidden sm:block text-xs leading-snug ${
                     isSelected ? 'text-slate-200' : 'text-slate-500'
                   }`}
                 >

@@ -598,6 +598,7 @@ export interface TravelRequest {
   outcomes: ProposalOutcome[];
   statusHistory: StatusHistoryEntry[];
   auditTrail: AuditLogEntry[];
+  dataEpoch?: string;
 }
 
 export interface ExchangeRateConfig {
